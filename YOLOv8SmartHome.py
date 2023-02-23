@@ -4,9 +4,8 @@ import cv2
 from time import time
 from ultralytics import YOLO
 
-from supervision.draw.color import ColorPalette
-from supervision import Detections
-from supervision import BoxAnnotator
+import supervision as sv
+
 
 from phue import Bridge
 
@@ -24,14 +23,14 @@ class ObjectDetection:
         self.capture_index = capture_index
         
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        #self.device = 'MPS' 
+
         print("Using Device: ", self.device)
         
         self.model = self.load_model()
         
         self.CLASS_NAMES_DICT = self.model.model.names
     
-        self.box_annotator = BoxAnnotator(color=ColorPalette.default(), thickness=3, text_thickness=3, text_scale=1.5)
+        self.box_annotator = sv.BoxAnnotator(color=sv.ColorPalette.default(), thickness=3, text_thickness=3, text_scale=1.5)
     
 
     def load_model(self):
@@ -66,12 +65,14 @@ class ObjectDetection:
                 class_ids.append(result.boxes.cls.cpu().numpy().astype(int))
             
         if len(class_ids) > 0:
-            b.set_light('Kontor', 'on', True)
+            b.set_light('Living Room 1', 'on', True)
+            b.set_light('Living Room 2', 'on', True)
         else:
-            b.set_light('Kontor', 'on', False)
+            b.set_light('Living Room 1', 'on', False)
+            b.set_light('Living Room 2', 'on', False)
             
         # Setup detections for visualization
-        detections = Detections(
+        detections = sv.Detections(
                     xyxy=results[0].boxes.xyxy.cpu().numpy(),
                     confidence=results[0].boxes.conf.cpu().numpy(),
                     class_id=results[0].boxes.cls.cpu().numpy().astype(int),
@@ -94,8 +95,8 @@ class ObjectDetection:
 
         cap = cv2.VideoCapture(self.capture_index)
         assert cap.isOpened()
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
       
         while True:
           
@@ -123,5 +124,5 @@ class ObjectDetection:
         
         
     
-detector = ObjectDetection(capture_index=0)
+detector = ObjectDetection(capture_index=2)
 detector()
